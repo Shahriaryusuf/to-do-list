@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const date = require(__dirname+"/date.js")
 
 
 const app = express(); 
@@ -9,22 +10,18 @@ app.use(express.static("public"));
 
 app.use(bodyParser.urlencoded({extended:true}));
 
-let items = ["Buy Food","Eat Food","Digest Food"];
+const items = ["Buy Food","Eat Food","Digest Food"];
 
+const workItems = [];
+
+
+//get routes
 app.get("/",function(req,res){
 
-   let today = new Date();
-    
-    let options = {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-    };
-
-    let day = today.toLocaleDateString("en-US", options);
-
+    let day = date.getDate(); // from date.js
+  
     res.render("list", {
-        kindOfDay: day,
+        listTitle: day,
         newListItems: items
        
     });
@@ -33,12 +30,39 @@ app.get("/",function(req,res){
 
 app.post("/", function(req, res){
 
-    let item = req.body.newItem;
-    items.push(item);
+     //console.log(req.body);
+     let item = req.body.newItem;
+
+     //the logic is here
+     if (req.body.list === "Work") {
+         workItems.push(item);
+         res.redirect("/work");
+     }else{
+        items.push(item);
    
-    res.redirect("/");
+        res.redirect("/");
+     }
+    
+   
 
 });
+
+app.get("/work", function(req, res){
+
+    res.render("list",{
+        listTitle: "Work List", 
+        newListItems: workItems
+
+    });
+
+});
+
+app.get("/about", function(req, res){
+
+    res.render("about");
+})
+
+
 
 
 app.listen(3000,function(){
